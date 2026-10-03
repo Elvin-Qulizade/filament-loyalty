@@ -1,5 +1,6 @@
 <?php
 
+use ElvinQulizade\Loyalty\Models\LoyaltyTransaction;
 use ElvinQulizade\Loyalty\Tests\Fixtures\Customer;
 use ElvinQulizade\Loyalty\Tests\Fixtures\Order;
 
@@ -32,5 +33,5 @@ it('does not double-award when the same order is saved again', function () {
 it('does nothing when the order has no customer', function () {
     Order::create(['customer_id' => null, 'status' => 'paid', 'total' => 120]);
 
-    expect(ElvinQulizade\Loyalty\Models\LoyaltyTransaction::count())->toBe(0);
+    expect(LoyaltyTransaction::count())->toBe(0);
 });
