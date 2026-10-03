@@ -13,6 +13,7 @@ class LoyaltyServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package->name(static::$name)
+            ->hasMigrations($this->getMigrations())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
                     ->publishConfigFile()
@@ -23,4 +24,15 @@ class LoyaltyServiceProvider extends PackageServiceProvider
     }
 
     public function packageBooted(): void {}
+
+    /**
+     * @return array<string>
+     */
+    protected function getMigrations(): array
+    {
+        return [
+            'create_loyalty_transactions_table',
+            'create_loyalty_rewards_table',
+        ];
+    }
 }

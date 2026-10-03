@@ -1,0 +1,22 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('loyalty_transactions', function (Blueprint $table) {
+            $table->id();
+            $table->morphs('member');
+            $table->string('type');
+            $table->integer('points');
+            $table->string('reason')->nullable();
+            $table->nullableMorphs('source');
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('created_at')->nullable();
+        });
+    }
+};
