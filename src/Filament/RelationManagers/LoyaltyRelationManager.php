@@ -2,6 +2,7 @@
 
 namespace ElvinQulizade\Loyalty\Filament\RelationManagers;
 
+use ElvinQulizade\Loyalty\Contracts\LoyaltyMember;
 use ElvinQulizade\Loyalty\Filament\Actions\RedeemLoyaltyRewardAction;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -9,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class LoyaltyRelationManager extends RelationManager
 {
@@ -21,6 +23,17 @@ class LoyaltyRelationManager extends RelationManager
         return 'Loyalty';
     }
 
+    /**
+     * @return LoyaltyMember&Model
+     */
+    protected function loyaltyMember(): Model
+    {
+        /** @var LoyaltyMember&Model $member */
+        $member = $this->getOwnerRecord();
+
+        return $member;
+    }
+
     public function table(Table $table): Table
     {
         return $table
@@ -28,9 +41,9 @@ class LoyaltyRelationManager extends RelationManager
             ->defaultSort('id', 'desc')
             ->description(fn (): string => sprintf(
                 '%d points · %d lifetime · %s tier',
-                $this->getOwnerRecord()->loyaltyBalance(),
-                $this->getOwnerRecord()->loyaltyLifetimePoints(),
-                ucfirst($this->getOwnerRecord()->loyaltyTier()),
+                $this->loyaltyMember()->loyaltyBalance(),
+                $this->loyaltyMember()->loyaltyLifetimePoints(),
+                ucfirst($this->loyaltyMember()->loyaltyTier()),
             ))
             ->headerActions([
                 Action::make('adjustPoints')
@@ -41,7 +54,7 @@ class LoyaltyRelationManager extends RelationManager
                         TextInput::make('reason')->required(),
                     ])
                     ->action(function (array $data): void {
-                        $this->getOwnerRecord()->adjustLoyaltyPoints(
+                        $this->loyaltyMember()->adjustLoyaltyPoints(
                             (int) $data['points'],
                             $data['reason'],
                             auth()->user(),

@@ -11,6 +11,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Illuminate\Database\Eloquent\Model;
 
 class RedeemLoyaltyRewardAction
 {
@@ -30,7 +31,7 @@ class RedeemLoyaltyRewardAction
                     ->required(),
             ])
             ->action(function (array $data, RelationManager $livewire): void {
-                /** @var LoyaltyMember $member */
+                /** @var LoyaltyMember&Model $member */
                 $member = $livewire->getOwnerRecord();
                 $reward = LoyaltyReward::findOrFail($data['reward_id']);
 

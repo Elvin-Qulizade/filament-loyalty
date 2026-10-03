@@ -6,13 +6,13 @@ use RuntimeException;
 
 class RewardUnavailableException extends RuntimeException
 {
-    public static function inactive(): static
+    public static function inactive(): self
     {
-        return new static('This reward is no longer active.');
+        return new self('This reward is no longer active.');
     }
 
-    public static function outOfStock(): static
+    public static function outOfStock(): self
     {
-        return new static('This reward is out of stock.');
+        return new self('This reward is out of stock.');
     }
 }

@@ -5,67 +5,104 @@
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/elvin-qulizade/filament-loyalty/fix-code-style.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/elvin-qulizade/filament-loyalty/actions?query=workflow%3Afix-code-style+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/elvin-qulizade/filament-loyalty.svg?style=flat-square)](https://packagist.org/packages/elvin-qulizade/filament-loyalty)
 
-<!--delete-->
----
-This repo can be used to scaffold a Filament plugin. Follow these steps to get started:
-
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Make something great!
----
-<!--/delete-->
-
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Attach points earning, tiers, and redeemable rewards to any Eloquent model — not just
+customers. Earning rules are config, not code: list a model class, a condition, and how
+many points to award, and the package listens for you. No observers to register, no
+Facade calls to sprinkle through your app.
 
 ## Installation
 
-You can install the package via composer:
-
 ```bash
-composer require :vendor_slug/:package_slug
+composer require elvin-qulizade/filament-loyalty
 ```
 
-> [!IMPORTANT]
-> If you have not set up a custom theme and are using Filament Panels follow the instructions in the [Filament Docs](https://filamentphp.com/docs/4.x/styling/overview#creating-a-custom-theme) first.
-
-After setting up a custom theme add the plugin's views to your theme css file or your app's css file if using the standalone packages.
-
-```css
-@source '../../../../vendor/:vendor_slug/:package_slug/resources/**/*.blade.php';
-```
-
-You can publish and run the migrations with:
-
 ```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
+php artisan vendor:publish --tag="filament-loyalty-migrations"
 php artisan migrate
 ```
 
-You can publish the config file with:
-
 ```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
-
-Optionally, you can publish the views using
-
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
-```
-
-This is the contents of the published config file:
-
-```php
-return [
-];
+php artisan vendor:publish --tag="filament-loyalty-config"
 ```
 
 ## Usage
 
+1. Add the trait and contract to any Eloquent model you want to earn/spend points:
+
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+use ElvinQulizade\Loyalty\Concerns\HasLoyaltyPoints;
+use ElvinQulizade\Loyalty\Contracts\LoyaltyMember;
+
+class Customer extends Model implements LoyaltyMember
+{
+    use HasLoyaltyPoints;
+}
 ```
+
+2. Configure an earning rule — no listener, no observer:
+
+```php
+// config/filament-loyalty.php
+'rules' => [
+    \App\Models\Order::class => [
+        'member' => fn (Order $order) => $order->customer,
+        'when'   => fn (Order $order) => $order->status === 'paid',
+        'points' => fn (Order $order) => (int) floor($order->total),
+    ],
+],
+
+'tiers' => [
+    'bronze' => 0,
+    'silver' => 500,
+    'gold'   => 2000,
+],
+```
+
+3. Show the ledger on the member's own resource:
+
+```php
+use ElvinQulizade\Loyalty\Filament\RelationManagers\LoyaltyRelationManager;
+
+public static function getRelations(): array
+{
+    return [
+        LoyaltyRelationManager::class,
+    ];
+}
+```
+
+That's it — every order that matches your `when` condition earns points automatically, the
+Customer's "Loyalty" tab shows the full ledger with the current balance/lifetime
+points/tier, and staff can manually adjust points (with a required reason) or redeem a
+reward on the member's behalf from that same tab.
+
+Tiers are based on **lifetime earned points**, not current balance — redeeming a reward
+never demotes a member's tier.
+
+4. Manage the reward catalog by adding the resource to your panel:
+
+```php
+use ElvinQulizade\Loyalty\Filament\Resources\LoyaltyRewardResource;
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        ->resources([
+            LoyaltyRewardResource::class,
+        ]);
+}
+```
+
+5. Call the engine directly wherever code, not a panel action, should earn/spend points:
+
+```php
+$customer->earnLoyaltyPoints(50, reason: 'Referral bonus');
+$customer->redeemLoyaltyPoints(20, reason: 'Manual redemption');
+$customer->adjustLoyaltyPoints(-10, 'Correcting a duplicate award'); // reason required
+```
+
+Drop `ElvinQulizade\Loyalty\Filament\LoyaltyTierColumn::make()` into any table (e.g. the
+member's own list view) to show the tier badge outside the Loyalty tab too.
 
 ## Testing
 
@@ -87,7 +124,7 @@ Please review [our security policy](.github/SECURITY.md) on how to report securi
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [Elvin-Qulizade](https://github.com/Elvin-Qulizade)
 - [All Contributors](../../contributors)
 
 ## License

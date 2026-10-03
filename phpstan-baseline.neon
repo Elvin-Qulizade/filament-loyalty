@@ -1,0 +1,9 @@
+parameters:
+	ignoreErrors:
+		-
+			# Only used by host-app models outside this repo (e.g. tests/Fixtures/Customer.php,
+			# which lives outside the analysed src/config/database paths).
+			message: '#^Trait ElvinQulizade\\Loyalty\\Concerns\\HasLoyaltyPoints is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Concerns/HasLoyaltyPoints.php

@@ -11,6 +11,7 @@ class LoyaltyRuleRegistrar
     public static function boot(): void
     {
         foreach (array_keys((array) config('filament-loyalty.rules', [])) as $modelClass) {
+            /** @var class-string<Model> $modelClass */
             $modelClass::saved(function (Model $model) use ($modelClass): void {
                 static::handle($modelClass, $model);
             });
