@@ -86,6 +86,13 @@ class LoyaltyRelationManager extends RelationManager
 
                 TextColumn::make('reason')
                     ->limit(50),
+
+                TextColumn::make('source_id')
+                    ->label('Source')
+                    ->formatStateUsing(fn ($record): ?string => $record->source_type
+                        ? class_basename($record->source_type) . ' #' . $record->source_id
+                        : null)
+                    ->placeholder('—'),
             ]);
     }
 }

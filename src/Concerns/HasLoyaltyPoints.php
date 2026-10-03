@@ -66,6 +66,13 @@ trait HasLoyaltyPoints
         $points = abs($points);
 
         return DB::transaction(function () use ($points, $reason, $source) {
+            // Lock the member's own row as a mutex for this member's balance.
+            // Without it, two concurrent redemptions can both read the same
+            // balance, both pass the check below, and both insert — overdrawing
+            // the balance. The reward-stock path already locks the reward row
+            // for the same reason; this closes the matching gap on the member side.
+            static::query()->whereKey($this->getKey())->lockForUpdate()->first();
+
             if ($points > $this->loyaltyBalance()) {
                 // @phpstan-ignore-next-line argument.type — same trait-self-type
                 // limitation as dispatchLoyaltyTierChangeIfAny() below.

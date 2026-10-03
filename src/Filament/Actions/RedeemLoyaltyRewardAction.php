@@ -23,11 +23,17 @@ class RedeemLoyaltyRewardAction
             ->schema([
                 Select::make('reward_id')
                     ->label('Reward')
-                    ->options(fn (): array => LoyaltyReward::query()
-                        ->where('active', true)
-                        ->where(fn ($query) => $query->whereNull('stock')->orWhere('stock', '>', 0))
-                        ->pluck('name', 'id')
-                        ->all())
+                    ->options(function (RelationManager $livewire): array {
+                        /** @var LoyaltyMember&Model $member */
+                        $member = $livewire->getOwnerRecord();
+
+                        return LoyaltyReward::query()
+                            ->where('active', true)
+                            ->where(fn ($query) => $query->whereNull('stock')->orWhere('stock', '>', 0))
+                            ->where('points_cost', '<=', $member->loyaltyBalance())
+                            ->pluck('name', 'id')
+                            ->all();
+                    })
                     ->required(),
             ])
             ->action(function (array $data, RelationManager $livewire): void {

@@ -45,9 +45,9 @@ class Customer extends Model implements LoyaltyMember
 // config/filament-loyalty.php
 'rules' => [
     \App\Models\Order::class => [
-        'member' => fn (Order $order) => $order->customer,
-        'when'   => fn (Order $order) => $order->status === 'paid',
-        'points' => fn (Order $order) => (int) floor($order->total),
+        'member' => fn (\App\Models\Order $order) => $order->customer,
+        'when'   => fn (\App\Models\Order $order) => $order->status === 'paid',
+        'points' => fn (\App\Models\Order $order) => (int) floor($order->total),
     ],
 ],
 
@@ -57,6 +57,12 @@ class Customer extends Model implements LoyaltyMember
     'gold'   => 2000,
 ],
 ```
+
+> [!WARNING]
+> Rules use closures, so this config file cannot be cached: `php artisan config:cache`
+> fails with "Your configuration files are not serializable" as soon as a `rules` entry
+> exists. This is a known v1 limitation — don't run `config:cache` (or `optimize`) in a
+> deployment that uses this package's rules yet.
 
 3. Show the ledger on the member's own resource:
 
@@ -78,6 +84,12 @@ reward on the member's behalf from that same tab.
 
 Tiers are based on **lifetime earned points**, not current balance — redeeming a reward
 never demotes a member's tier.
+
+> [!NOTE]
+> "Adjust points" and "Redeem reward" are visible to anyone who can already open the
+> member's resource page in your panel — there's no separate permission for them in v1.
+> If you need finer control, subclass `LoyaltyRelationManager` and override `table()`,
+> or gate access to the member resource itself.
 
 4. Manage the reward catalog by adding the resource to your panel:
 
@@ -101,8 +113,25 @@ $customer->redeemLoyaltyPoints(20, reason: 'Manual redemption');
 $customer->adjustLoyaltyPoints(-10, 'Correcting a duplicate award'); // reason required
 ```
 
-Drop `ElvinQulizade\Loyalty\Filament\LoyaltyTierColumn::make()` into any table (e.g. the
-member's own list view) to show the tier badge outside the Loyalty tab too.
+Drop `ElvinQulizade\Loyalty\Filament\LoyaltyTierColumn::make()` into any table, or
+`ElvinQulizade\Loyalty\Filament\LoyaltyTierEntry::make()` into any infolist (e.g. the
+member's own list view or view page), to show the tier badge outside the Loyalty tab too.
+
+Other public pieces you may want directly:
+
+```php
+use ElvinQulizade\Loyalty\Events\TierChanged;             // fired by earn/adjust when loyaltyTier() changes
+use ElvinQulizade\Loyalty\Exceptions\InsufficientPointsException;
+use ElvinQulizade\Loyalty\Exceptions\RewardUnavailableException;
+use ElvinQulizade\Loyalty\Support\LoyaltyRewardRedeemer;   // LoyaltyRewardRedeemer::redeem($member, $reward)
+```
+
+`$member->loyaltyBalance()`, `$member->loyaltyLifetimePoints()` and `$member->loyaltyTier()`
+are plain read methods — safe to call anywhere, including outside the panel.
+
+**v1 limitation:** a rule only ever earns once per source row — editing a paid order's
+shipping address later won't double-award, but there's no "re-earn when the points
+amount changes" support yet either.
 
 ## Testing
 

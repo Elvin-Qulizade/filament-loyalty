@@ -32,8 +32,11 @@ class LoyaltyRuleRegistrar
             return;
         }
 
+        // Match on the model's own morph class, not the raw $modelClass string —
+        // earnLoyaltyPoints() stores source_type via getMorphClass() too, which
+        // resolves to a morph map alias when one is registered, not the FQCN.
         $alreadyAwarded = LoyaltyTransaction::query()
-            ->where('source_type', $modelClass)
+            ->where('source_type', $model->getMorphClass())
             ->where('source_id', $model->getKey())
             ->where('type', 'earn')
             ->exists();
