@@ -1,6 +1,7 @@
 <?php
 
 use ElvinQulizade\Loyalty\Events\TierChanged;
+use ElvinQulizade\Loyalty\Exceptions\InsufficientPointsException;
 use ElvinQulizade\Loyalty\Tests\Fixtures\Customer;
 use Illuminate\Support\Facades\Event;
 
@@ -95,4 +96,34 @@ it('does not dispatch TierChanged when the tier does not change', function () {
     $customer->earnLoyaltyPoints(100); // stays bronze
 
     Event::assertNotDispatched(TierChanged::class);
+});
+
+it('decreases balance on redeem without touching lifetime points', function () {
+    $customer = Customer::create(['name' => 'Ada']);
+    $customer->earnLoyaltyPoints(100);
+
+    $customer->redeemLoyaltyPoints(40, reason: 'Free shipping');
+
+    expect($customer->loyaltyBalance())->toBe(60);
+    expect($customer->loyaltyLifetimePoints())->toBe(100);
+});
+
+it('allows redeeming exactly the full balance', function () {
+    $customer = Customer::create(['name' => 'Ada']);
+    $customer->earnLoyaltyPoints(100);
+
+    $customer->redeemLoyaltyPoints(100);
+
+    expect($customer->loyaltyBalance())->toBe(0);
+});
+
+it('throws and makes no ledger entry when redeeming more than the balance', function () {
+    $customer = Customer::create(['name' => 'Ada']);
+    $customer->earnLoyaltyPoints(50);
+
+    expect(fn () => $customer->redeemLoyaltyPoints(51))
+        ->toThrow(InsufficientPointsException::class);
+
+    expect($customer->loyaltyBalance())->toBe(50);
+    expect($customer->loyaltyTransactions()->count())->toBe(1); // only the original earn
 });

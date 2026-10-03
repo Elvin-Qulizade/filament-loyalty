@@ -3,9 +3,11 @@
 namespace ElvinQulizade\Loyalty\Concerns;
 
 use ElvinQulizade\Loyalty\Events\TierChanged;
+use ElvinQulizade\Loyalty\Exceptions\InsufficientPointsException;
 use ElvinQulizade\Loyalty\Models\LoyaltyTransaction;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 trait HasLoyaltyPoints
@@ -57,6 +59,27 @@ trait HasLoyaltyPoints
         $this->dispatchLoyaltyTierChangeIfAny($previousTier);
 
         return $transaction;
+    }
+
+    public function redeemLoyaltyPoints(int $points, ?string $reason = null, ?Model $source = null): LoyaltyTransaction
+    {
+        $points = abs($points);
+
+        return DB::transaction(function () use ($points, $reason, $source) {
+            if ($points > $this->loyaltyBalance()) {
+                // @phpstan-ignore-next-line argument.type — same trait-self-type
+                // limitation as dispatchLoyaltyTierChangeIfAny() below.
+                throw new InsufficientPointsException($this, $points);
+            }
+
+            return $this->loyaltyTransactions()->create([
+                'type' => 'redeem',
+                'points' => -$points,
+                'reason' => $reason,
+                'source_type' => $source?->getMorphClass(),
+                'source_id' => $source?->getKey(),
+            ]);
+        });
     }
 
     public function adjustLoyaltyPoints(int $points, string $reason, ?Model $by = null): LoyaltyTransaction

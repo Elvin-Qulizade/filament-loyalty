@@ -18,5 +18,7 @@ interface LoyaltyMember
 
     public function earnLoyaltyPoints(int $points, ?string $reason = null, ?Model $source = null): LoyaltyTransaction;
 
+    public function redeemLoyaltyPoints(int $points, ?string $reason = null, ?Model $source = null): LoyaltyTransaction;
+
     public function adjustLoyaltyPoints(int $points, string $reason, ?Model $by = null): LoyaltyTransaction;
 }
