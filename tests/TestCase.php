@@ -3,6 +3,7 @@
 namespace ElvinQulizade\Loyalty\Tests;
 
 use ElvinQulizade\Loyalty\LoyaltyServiceProvider;
+use ElvinQulizade\Loyalty\Tests\Fixtures\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Orchestra\Testbench\Concerns\WithWorkbench;
@@ -33,6 +34,14 @@ class TestCase extends Orchestra
     {
         $app['config']->set('database.default', 'testing');
         $app['config']->set('app.key', 'base64:' . base64_encode(str_repeat('x', 32)));
+
+        $app['config']->set('filament-loyalty.rules', [
+            Order::class => [
+                'member' => fn (Order $order) => $order->customer,
+                'when' => fn (Order $order) => $order->status === 'paid',
+                'points' => fn (Order $order) => (int) floor($order->total),
+            ],
+        ]);
     }
 
     protected function defineDatabaseMigrations(): void

@@ -2,6 +2,7 @@
 
 namespace ElvinQulizade\Loyalty;
 
+use ElvinQulizade\Loyalty\Support\LoyaltyRuleRegistrar;
 use Spatie\LaravelPackageTools\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
@@ -24,7 +25,10 @@ class LoyaltyServiceProvider extends PackageServiceProvider
             });
     }
 
-    public function packageBooted(): void {}
+    public function packageBooted(): void
+    {
+        LoyaltyRuleRegistrar::boot();
+    }
 
     /**
      * @return array<string>
