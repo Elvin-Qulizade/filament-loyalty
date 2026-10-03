@@ -13,6 +13,7 @@ class LoyaltyServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package->name(static::$name)
+            ->hasConfigFile()
             ->hasMigrations($this->getMigrations())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command
