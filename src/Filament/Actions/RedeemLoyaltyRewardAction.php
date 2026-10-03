@@ -36,7 +36,7 @@ class RedeemLoyaltyRewardAction
 
                 try {
                     LoyaltyRewardRedeemer::redeem($member, $reward);
-                } catch (InsufficientPointsException|RewardUnavailableException $exception) {
+                } catch (InsufficientPointsException | RewardUnavailableException $exception) {
                     Notification::make()
                         ->title('Could not redeem reward')
                         ->body($exception->getMessage())
