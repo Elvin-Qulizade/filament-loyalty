@@ -5,6 +5,7 @@
 .vscode
 build
 coverage
+composer.lock
 docs
 node_modules
 phpunit.xml

@@ -1,24 +1,24 @@
 {
-    "name": ":vendor_slug/:package_slug",
-    "description": ":package_description",
+    "name": "elvin-qulizade/filament-loyalty",
+    "description": "Generic points, tiers and rewards for any Filament resource",
     "keywords": [
-        ":vendor_name",
+        "Elvin-Qulizade",
         "laravel",
         "filamentphp",
         "filament",
         "filament-plugin",
-        ":package_slug"
+        "filament-loyalty"
     ],
-    "homepage": "https://github.com/:vendor_slug/:package_slug",
+    "homepage": "https://github.com/elvin-qulizade/filament-loyalty",
     "support": {
-        "issues": "https://github.com/:vendor_slug/:package_slug/issues",
-        "source": "https://github.com/:vendor_slug/:package_slug"
+        "issues": "https://github.com/elvin-qulizade/filament-loyalty/issues",
+        "source": "https://github.com/elvin-qulizade/filament-loyalty"
     },
     "license": "MIT",
     "authors": [
         {
-            "name": ":author_name",
-            "email": "author@domain.com",
+            "name": "Elvin-Qulizade",
+            "email": "equluzade00@gmail.com",
             "role": "Developer"
         }
     ],
@@ -43,32 +43,29 @@
     },
     "autoload": {
         "psr-4": {
-            "VendorName\\Skeleton\\": "src/",
-            "VendorName\\Skeleton\\Database\\Factories\\": "database/factories/"
+            "ElvinQulizade\\Loyalty\\": "src/",
+            "ElvinQulizade\\Loyalty\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "VendorName\\Skeleton\\Tests\\": "tests/"
+            "ElvinQulizade\\Loyalty\\Tests\\": "tests/"
         }
     },
     "scripts": {
         "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "analyse": "phpstan analyse",
+        "analyse": "phpstan analyse --memory-limit=1G",
         "lint": "pint",
         "refactor": "rector",
-        "test": "pest",
+        "test": "pest --no-coverage",
         "test:lint": "pint --test",
         "test:refactor": "rector --dry-run"
     },
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\Skeleton\\SkeletonServiceProvider"
-            ],
-            "aliases": {
-                "Skeleton": "VendorName\\Skeleton\\Facades\\Skeleton"
-            }
+                "ElvinQulizade\\Loyalty\\LoyaltyServiceProvider"
+            ]
         }
     },
     "config": {
