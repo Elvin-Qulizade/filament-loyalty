@@ -4,8 +4,8 @@ namespace ElvinQulizade\Loyalty\Filament\Resources;
 
 use ElvinQulizade\Loyalty\Filament\Resources\LoyaltyRewardResource\Pages;
 use ElvinQulizade\Loyalty\Models\LoyaltyReward;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
