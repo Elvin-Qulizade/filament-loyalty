@@ -2,12 +2,28 @@
 
 namespace ElvinQulizade\Loyalty\Tests;
 
+use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
+use BladeUI\Icons\BladeIconsServiceProvider;
 use ElvinQulizade\Loyalty\LoyaltyServiceProvider;
 use ElvinQulizade\Loyalty\Tests\Fixtures\Order;
+use ElvinQulizade\Loyalty\Tests\Fixtures\TestPanelProvider;
+use Filament\Actions\ActionsServiceProvider;
+use Filament\Facades\Filament;
+use Filament\FilamentServiceProvider;
+use Filament\Forms\FormsServiceProvider;
+use Filament\Infolists\InfolistsServiceProvider;
+use Filament\Notifications\NotificationsServiceProvider;
+use Filament\Panel;
+use Filament\Schemas\SchemasServiceProvider;
+use Filament\Support\SupportServiceProvider;
+use Filament\Tables\TablesServiceProvider;
+use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
+use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -25,9 +41,27 @@ class TestCase extends Orchestra
 
     protected function getPackageProviders($app)
     {
-        return [
+        $providers = [
+            ActionsServiceProvider::class,
+            BladeCaptureDirectiveServiceProvider::class,
+            BladeHeroiconsServiceProvider::class,
+            BladeIconsServiceProvider::class,
+            FilamentServiceProvider::class,
+            FormsServiceProvider::class,
+            InfolistsServiceProvider::class,
+            LivewireServiceProvider::class,
+            NotificationsServiceProvider::class,
+            SchemasServiceProvider::class,
+            SupportServiceProvider::class,
+            TablesServiceProvider::class,
+            WidgetsServiceProvider::class,
             LoyaltyServiceProvider::class,
+            TestPanelProvider::class,
         ];
+
+        sort($providers);
+
+        return $providers;
     }
 
     public function getEnvironmentSetUp($app): void
@@ -42,6 +76,11 @@ class TestCase extends Orchestra
                 'points' => fn (Order $order) => (int) floor($order->total),
             ],
         ]);
+    }
+
+    protected function panel(): Panel
+    {
+        return Filament::getDefaultPanel();
     }
 
     protected function defineDatabaseMigrations(): void
