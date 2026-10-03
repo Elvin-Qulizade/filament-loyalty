@@ -16,6 +16,7 @@ class TestPanelProvider extends PanelProvider
             ->default()
             ->resources([
                 LoyaltyRewardResource::class,
+                CustomerResource::class,
             ]);
     }
 }
