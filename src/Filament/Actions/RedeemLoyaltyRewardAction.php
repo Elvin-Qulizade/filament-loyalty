@@ -18,11 +18,11 @@ class RedeemLoyaltyRewardAction
     public static function make(string $name = 'redeemReward'): Action
     {
         return Action::make($name)
-            ->label('Redeem reward')
+            ->label(__('filament-loyalty::loyalty.actions.redeem_reward.label'))
             ->icon('heroicon-o-gift')
             ->schema([
                 Select::make('reward_id')
-                    ->label('Reward')
+                    ->label(__('filament-loyalty::loyalty.actions.redeem_reward.reward_field'))
                     ->options(function (RelationManager $livewire): array {
                         /** @var LoyaltyMember&Model $member */
                         $member = $livewire->getOwnerRecord();
@@ -45,7 +45,7 @@ class RedeemLoyaltyRewardAction
                     LoyaltyRewardRedeemer::redeem($member, $reward);
                 } catch (InsufficientPointsException | RewardUnavailableException $exception) {
                     Notification::make()
-                        ->title('Could not redeem reward')
+                        ->title(__('filament-loyalty::loyalty.notifications.redeem_failed'))
                         ->body($exception->getMessage())
                         ->danger()
                         ->send();
@@ -54,7 +54,7 @@ class RedeemLoyaltyRewardAction
                 }
 
                 Notification::make()
-                    ->title('Reward redeemed')
+                    ->title(__('filament-loyalty::loyalty.notifications.redeem_success'))
                     ->success()
                     ->send();
             });

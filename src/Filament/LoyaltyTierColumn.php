@@ -9,7 +9,7 @@ class LoyaltyTierColumn
     public static function make(string $name = 'tier'): TextColumn
     {
         return TextColumn::make($name)
-            ->label('Tier')
+            ->label(__('filament-loyalty::loyalty.tier.label'))
             ->state(fn ($record) => $record->loyaltyTier())
             ->formatStateUsing(fn (string $state): string => ucfirst($state))
             ->badge()

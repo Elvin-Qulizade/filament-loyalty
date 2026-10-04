@@ -15,6 +15,7 @@ class LoyaltyServiceProvider extends PackageServiceProvider
     {
         $package->name(static::$name)
             ->hasConfigFile()
+            ->hasTranslations()
             ->hasMigrations($this->getMigrations())
             ->hasInstallCommand(function (InstallCommand $command) {
                 $command

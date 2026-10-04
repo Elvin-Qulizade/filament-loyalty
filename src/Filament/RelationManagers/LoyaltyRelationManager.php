@@ -20,7 +20,7 @@ class LoyaltyRelationManager extends RelationManager
 
     public static function getTitle($ownerRecord, string $pageClass): string
     {
-        return 'Loyalty';
+        return __('filament-loyalty::loyalty.relation_manager.title');
     }
 
     /**
@@ -39,19 +39,23 @@ class LoyaltyRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('reason')
             ->defaultSort('id', 'desc')
-            ->description(fn (): string => sprintf(
-                '%d points · %d lifetime · %s tier',
-                $this->loyaltyMember()->loyaltyBalance(),
-                $this->loyaltyMember()->loyaltyLifetimePoints(),
-                ucfirst($this->loyaltyMember()->loyaltyTier()),
-            ))
+            ->description(fn (): string => __('filament-loyalty::loyalty.relation_manager.description', [
+                'balance' => $this->loyaltyMember()->loyaltyBalance(),
+                'lifetime' => $this->loyaltyMember()->loyaltyLifetimePoints(),
+                'tier' => ucfirst($this->loyaltyMember()->loyaltyTier()),
+            ]))
             ->headerActions([
                 Action::make('adjustPoints')
-                    ->label('Adjust points')
+                    ->label(__('filament-loyalty::loyalty.actions.adjust_points.label'))
                     ->icon('heroicon-o-plus-circle')
                     ->schema([
-                        TextInput::make('points')->numeric()->required(),
-                        TextInput::make('reason')->required(),
+                        TextInput::make('points')
+                            ->label(__('filament-loyalty::loyalty.actions.adjust_points.points_field'))
+                            ->numeric()
+                            ->required(),
+                        TextInput::make('reason')
+                            ->label(__('filament-loyalty::loyalty.actions.adjust_points.reason_field'))
+                            ->required(),
                     ])
                     ->action(function (array $data): void {
                         $this->loyaltyMember()->adjustLoyaltyPoints(
@@ -61,7 +65,7 @@ class LoyaltyRelationManager extends RelationManager
                         );
 
                         Notification::make()
-                            ->title('Points adjusted')
+                            ->title(__('filament-loyalty::loyalty.notifications.points_adjusted'))
                             ->success()
                             ->send();
                     }),
@@ -70,10 +74,13 @@ class LoyaltyRelationManager extends RelationManager
             ])
             ->columns([
                 TextColumn::make('created_at')
+                    ->label(__('filament-loyalty::loyalty.columns.created_at'))
                     ->dateTime()
                     ->sortable(),
 
                 TextColumn::make('type')
+                    ->label(__('filament-loyalty::loyalty.columns.type'))
+                    ->formatStateUsing(fn (string $state): string => __('filament-loyalty::loyalty.types.' . $state))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'earn' => 'success',
@@ -82,13 +89,15 @@ class LoyaltyRelationManager extends RelationManager
                     }),
 
                 TextColumn::make('points')
+                    ->label(__('filament-loyalty::loyalty.columns.points'))
                     ->formatStateUsing(fn (int $state): string => ($state > 0 ? '+' : '') . $state),
 
                 TextColumn::make('reason')
+                    ->label(__('filament-loyalty::loyalty.columns.reason'))
                     ->limit(50),
 
                 TextColumn::make('source_id')
-                    ->label('Source')
+                    ->label(__('filament-loyalty::loyalty.columns.source'))
                     ->formatStateUsing(fn ($record): ?string => $record->source_type
                         ? class_basename($record->source_type) . ' #' . $record->source_id
                         : null)
